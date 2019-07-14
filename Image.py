@@ -9,18 +9,18 @@ class Image:
         self.width = widthInput
         self.pixelValue = pixelValue
         
-        n = np.full((self.width, self.height), self.pixelValue)        #Creates a numpy object and creates the specified array
-        hdu = pyfits.PrimaryHDU(n)                      #PrimaryHDU object to encapsulate the data
-        self.hdulist = pyfits.HDUList([hdu])                 #Creating an HDUList to contain the newly created primary HDU
+        n = np.full((self.width, self.height), self.pixelValue)         #Creates a numpy object and creates the specified array
+        hdu = pyfits.PrimaryHDU(n)                                      #PrimaryHDU object to encapsulate the data
+        self.hdulist = pyfits.HDUList([hdu])                            #Creating an HDUList to contain the newly created primary HDU
     
-    def readPixel(self):
+    def readPixel(self):                                                #Work in progress
         print('')
     def writePixel(self):
         print('')
         
     def saveImage(self, imageName):
-        self.hdulist.writeto(imageName)                      #Should save file (and did in previous versions),
-                                                        #yet is now not due to the saveImage method not having access to 'hdulist'
+        self.hdulist.writeto(imageName)                                 #Saves file as imageName parameter (MUST INCLUDE '.fits' extension!)
+                                                        
 
 
 
