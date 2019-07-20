@@ -32,7 +32,7 @@ class Image:
         self.writePixel(centerX + y, centerY - x, 50.0)
         self.writePixel(centerX - y, centerY - x, 50.0)
         
-        for xx in range(centerX - x, centerX + x + 1):                               #This loop filles in the top and bottom quarters of the circle.
+        for xx in range(centerX - x, centerX + x + 1):                               #This loop fills in the top and bottom quarters of the circle.
             self.writePixel(xx, centerY + y, 50.0)
             self.writePixel(xx, centerY - y, 50.0)
         for xx in range(centerX - y, centerX + y):                                   #This loop fills in the middle quarters of the circle.
