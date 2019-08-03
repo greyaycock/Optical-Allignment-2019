@@ -22,37 +22,23 @@ class Image:
         print("Pixel at (" , pixelX , "," , pixelY , ") changed to " , newValue , ".")
       
 #######################Circle Drawing############################      
-        
-    def drawCircle(self, centerX, centerY, x, y):                                    #Method responsible for the actual pixel writing
-        
-        self.writePixel(centerX + x, centerY - y, 50.0)                              #These 6 writePixel() calls create 6/8 of the circle outline,
-        self.writePixel(centerX - x, centerY - y, 50.0)                              #with each call being responsible for one octile of the circle.
-        self.writePixel(centerX + y, centerY + x, 50.0)                              #The result is a "bowl" shape, leaving the top two octile
-        self.writePixel(centerX - y, centerY + x, 50.0)                              #empty so that the loops following can go through and fill in the rest.
-        self.writePixel(centerX + y, centerY - x, 50.0)
-        self.writePixel(centerX - y, centerY - x, 50.0)
-        
-        for xx in range(centerX - x, centerX + x + 1):                               #This loop fills in the top and bottom quarters of the circle.
-            self.writePixel(xx, centerY + y, 50.0)
-            self.writePixel(xx, centerY - y, 50.0)
-        for xx in range(centerX - y, centerX + y):                                   #This loop fills in the middle quarters of the circle.
-            self.writePixel(xx, centerY + x, 50.0)
-            self.writePixel(xx, centerY - x, 50.0)
 
-    def generateCircle(self, xc, yc, r):                                   #Method based on Bresenham's circle-generation algorithm
-        x = 0                                                              #Takes parameters for center (xc, yc) coordinate, as well as the radius (r)
-        y = r
-        d = 3 - (2*r)
-        self.drawCircle(xc, yc, x, y)
-        while(y>=x):
-            x+=1
-            if(d>0):                                                       #Updates d and y values
-                y-=1
-                d = d+4*(x-y)+10
-            else:
-                d = d + 4 * x + 6
-            self.drawCircle(xc, yc, x, y)
-            time.sleep(.06)                                                #Delay helps program run smoother
+    def generateCircle(self, xc, yc, r, value):
+    # need to vary x and y coordinates over broad enough range to
+    # catch all pixels that could be in the system
+        for x in range(int(xc-r-2), int(xc+r+2)):
+            if x < 0:
+                continue            # don't fall off the edge
+            for y in range(int(yc-r-2), int(yc+r+2)):
+                if y < 0:
+                    continue        # don't fall off the edge
+            # if this pixel is within one radius of the center, then
+            # set the pixel
+                dx = x-xc
+                dy = y-yc
+                if r*r >= dx*dx + dy*dy:
+                    self.writePixel(x, y, value)
+                    
             
 ################File Manipulation##########################        
     def saveImage(self, imageName):
@@ -61,6 +47,3 @@ class Image:
         self.hdulist.writeto(imageName)                                    #Saves file as imageName parameter (MUST INCLUDE '.fits' extension!)
         
 ################Test Code##################################
-obj = Image(50, 50, 51.0)
-obj.generateCircle(35, 35, 10)
-obj.saveImage('circleTest13.fits')
