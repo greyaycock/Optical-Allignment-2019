@@ -40,5 +40,5 @@ class OpticalModel:
         image.saveImage('OpticalModelTest1.fits')
         
 ####################Test code###############
-opti = OpticalModel(90, 90, 0.35, 50.0, 50.0, 20, 2.7, math.pi/2, 10000)                  #An OpticalModel object with the "typical" values outlined in 
+opti = OpticalModel(90, 90, 0.35, 50.0, 50.0, 20.0, 2.7, math.pi/2, 10000)                  #An OpticalModel object with the "typical" values outlined in 
 opti.getDonut()                                                                         #ProjectPackageA2, as well as a tilt angle of pi (-y direction)
