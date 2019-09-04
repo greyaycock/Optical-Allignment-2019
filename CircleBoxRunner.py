@@ -1,10 +1,10 @@
-from CircleBox import *
+from CircleBoxTest import *
 
 testObj = CircleArea()
 
 print('--tiny box inside circle--')
 try:
-    result = testObj.area_in_circle(2.0, 2.0, 2.0, 2.01, 1.99, 2.01, 1.99)
+    result = testObj.area_in_circle(2.0, 2.0, 2.0, 2.01, 1.99, 1.99, 2.01)
     print('Overlap area should be: 0.000400')
     print('Overlap area is:' , result , '\r\n')
 except:
@@ -49,7 +49,7 @@ except:
 ################################################################################    
 print('--1/2 box in circle--')
 try:
-    result = testObj.area_in_circle(2.0, 2.0, 2.0, 2.001, 0.0, -2.0, 2.0)
+    result = testObj.area_in_circle(2.0, 2.0, 2.0, 2.001, 1.999, -2.0, 2.0)
     print('Overlap area should be: 0.00400')
     print('Overlap area is:' , result , '\r\n')
 except:
@@ -58,7 +58,7 @@ except:
 ################################################################################    
 print('--all but a sliver of circle--')
 try:
-    result = testObj.area_in_circle(2.0, 2.0, 2.0, -3.999, 0.0, -1.0, 5.0)
+    result = testObj.area_in_circle(2.0, 2.0, 2.0, 3.999, 0.0, -1.0, 5.0)
     print('Overlap area should be: 12.566286')
     print('Overlap area is:' , result , '\r\n')
 except:

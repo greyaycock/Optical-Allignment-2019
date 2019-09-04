@@ -17,38 +17,40 @@ class CircleArea:
     def point_in_square(self, box_top, box_bottom,  box_left,  box_right, x, y):
         return (x >= box_left and x <= box_right and y >= box_bottom and y <= box_top)
     
-    def find_point_vert(self, circle_x, circle_y, circle_radius, x_in, y_out1,  y_out2):                                 
-        self.intersect1, self.intersect2 = y_out1, y_out2              
+    def find_point_vert(self, circle_x, circle_y, circle_radius, x_in):
         delta_x = (x_in - circle_x)   
-        #y_sq = 0.0
-        #if (circle_radius*circle_radius - delta_x*delta_x) >= 0:
-        y_sq = math.sqrt(circle_radius*circle_radius - delta_x*delta_x)
-        self.intersect1 = y_sq + circle_y                                                                                        
-        self.intersect2 = circle_y - y_sq
+        disc = circle_radius*circle_radius - delta_x*delta_x
+        if (disc >= 0.0):
+            y_sq = math.sqrt(disc)
+            return (y_sq+circle_y, circle_y-y_sq)
+        else:
+            return (np.nan,np.nan)
     
-    def find_point_horiz(self, circle_x, circle_y, circle_radius, y_in, x_out1, x_out2):
+    def find_point_horiz(self, circle_x, circle_y, circle_radius, y_in):
         delta_y = (y_in - circle_y)
-        x_sq = math.sqrt(circle_radius*circle_radius - delta_y*delta_y)
-        self.x_out1 = x_sq + circle_x
-        self.x_out2 = circle_x - x_sq
+        disc = circle_radius*circle_radius - delta_y*delta_y
+        if (disc >= 0.0):
+            x_sq = math.sqrt(disc)
+            return (x_sq+circle_x, circle_x - x_sq)
+        else:
+            return (np.nan, np.nan)
 
+    def circle_intersects_vertical(self, circle_x, circle_y, circle_radius, x, y_low, y_high):
+        intersect1, intersect2 = self.find_point_vert(circle_x, circle_y, circle_radius, x)
+        if (intersect1 != None):
+            if (intersect1 >= y_low and intersect1 <= y_high):
+                return True
+
+        if (intersect2 != None):
+            if (intersect2 >= y_low and intersect2 <= y_high):
+                return True
+                
+        return False
+    
     def chord_area(self, chord, radius):
         theta = 2.0 * math.asin(chord/(2*radius))
         area = radius*radius*0.5*(theta - math.sin(theta))
         return area
-        
-    def circle_intersects_vertical(self, circle_x, circle_y, circle_radius, x, y_low, y_high):
-        self.intersect1, self.intersect2 = np.nan, np.nan
-        self.find_point_vert(circle_x, circle_y, circle_radius, x, self.intersect1, self.intersect2)
-        if (not math.isnan(self.intersect1)):                                                                             
-            if (self.intersect1 >= y_low and self.intersect1 <= y_high):                                                       
-                return True
-
-        if (not math.isnan(self.intersect2)):
-            if (self.intersect2 >= y_low and self.intersect2 <= y_high):
-                return True
-                
-        return False
         
         #############Insert circle_intersects_horizontal###################
         
@@ -76,8 +78,8 @@ class CircleArea:
 
         if (not top_left_inside):
             intersect1, intersect2, dummy = 0, 0, 0
-            self.find_point_horiz(circle_x, circle_y, circle_radius, box_top, dummy, intersect1)
-            self.find_point_vert(circle_x, circle_y, circle_radius, box_left, intersect2, dummy)
+            dummy, intersect1 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_top)
+            intersect2, dummy = self.find_point_vert(circle_x, circle_y, circle_radius, box_left)
             '''by setting the first argument (box_area) to 0.0, we set up
                do_case_1 to return a negative value, which is the area of
                the chunk cut off at the top_left corner.              '''
@@ -86,7 +88,7 @@ class CircleArea:
                 #fprintf(stderr, "z")
 
         if (not top_right_inside):
-            intersect1, intersect2, dummy = 0, 0, 0      
+            intersect1, intersect2, dummy = 0, 0, 0      #Were originally just declared, could be wrong to set to 0
             self.find_point_horiz(circle_x, circle_y, circle_radius, box_top, intersect1, dummy)
             self.find_point_vert(circle_x, circle_y, circle_radius, box_right, intersect2, dummy)
             upper_right = -self.do_case_1(0.0, circle_radius, box_right, box_top, intersect1, intersect2, True)
@@ -187,22 +189,22 @@ class CircleArea:
             if (top_left_inside or top_right_inside):
                 '''if(letter_debug): 
                     fprintf(stderr, "A")'''
-                self.find_point_horiz(circle_x, circle_y, circle_radius,box_top, right_intersect, left_intersect)
+                right_intersect, left_intersect = self.find_point_horiz(circle_x, circle_y, circle_radius,box_top)
             
             if (bottom_left_inside or bottom_right_inside): 
                 '''if (letter_debug):
                     fprintf(stderr, "B")'''
-                self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom, right_intersect, left_intersect)
+                right_intersect, left_intersect = self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom)
     
             if (top_left_inside or bottom_left_inside): 
                 '''if (letter_debug):
                     fprintf(stderr, "C")'''
-                self.find_point_vert(circle_x, circle_y, circle_radius, box_left, top_intersect, bottom_intersect)
+                top_intersect, bottom_intersect = self.find_point_vert(circle_x, circle_y, circle_radius, box_left)
     
             if (top_right_inside or bottom_right_inside): 
                 '''if (letter_debug):
                     fprintf(stderr, "D")'''
-                self.find_point_vert(circle_x, circle_y, circle_radius, box_right, top_intersect, bottom_intersect)
+                top_intersect, bottom_intersect = self.find_point_vert(circle_x, circle_y, circle_radius, box_right)
     
 
             if (do_inversion):
@@ -248,12 +250,12 @@ class CircleArea:
             box_full_width = np.nan
 
             if (top_bottom):
-                self.find_point_horiz(circle_x, circle_y, circle_radius, box_top, intersect1, intersect2)
-                self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom, intersect3, intersect4)
+                intersect1, intersect2 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_top)
+                intersect3, intersect4 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom)
                 box_full_width = box_top - box_bottom
             else:
-                self.find_point_vert(circle_x, circle_y, circle_radius, box_left, intersect1, intersect2)
-                self.find_point_vert(circle_x, circle_y, circle_radius, box_right, intersect3, intersect4)
+                intersect1, intersect2 = self.find_point_vert(circle_x, circle_y, circle_radius, box_left)
+                intersect3, intersect4 = self.find_point_vert(circle_x, circle_y, circle_radius, box_right)
                 box_full_width = box_right - box_left
     
 
@@ -300,7 +302,7 @@ class CircleArea:
 
             if (center_is_in):
                 if (not top_is_in): 
-                    self.find_point_horiz(circle_x, circle_y, circle_radius, box_top, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_top)
                     assert(not math.isnan(intercept1))
                     chord = abs(intercept1 - intercept2)
                     '''if (letter_debug):
@@ -308,7 +310,7 @@ class CircleArea:
                     circle_area -= self.chord_area(chord, circle_radius)
       
                 if (not bottom_is_in): 
-                    self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom)
                     assert(not math.isnan(intercept1))
                     chord = abs(intercept1 - intercept2)
                     '''if (letter_debug):
@@ -316,7 +318,7 @@ class CircleArea:
                     circle_area -= self.chord_area(chord, circle_radius)
       
                 if (not left_is_in): 
-                    self.find_point_vert(circle_x, circle_y, circle_radius, box_left, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_vert(circle_x, circle_y, circle_radius, box_left)
                     assert(not math.isnan(intercept1))
                     chord = abs(intercept1 - intercept2)
                     '''if (letter_debug):
@@ -324,7 +326,7 @@ class CircleArea:
                     circle_area -= self.chord_area(chord, circle_radius)
       
                 if (not right_is_in): 
-                    self.find_point_vert(circle_x, circle_y, circle_radius, box_right, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_vert(circle_x, circle_y, circle_radius, box_right)
                     '''if (math.isnan(intercept1)): {
                         fprintf(stderr, "circle_box: err:\n");
                         fprintf(stderr, "circle_x = %lf, circle_y = %lf\n", circle_x, circle_y);
@@ -340,7 +342,7 @@ class CircleArea:
             else: 
             #center is not inside
                 if(top_is_in): 
-                    self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_bottom)
                     if (not (math.isnan(intercept1) or math.isnan(intercept2))): 
                         if (intercept1 >= box_left and intercept1 <= box_right and intercept2 >= box_left and intercept2 <= box_right): 
                             chord = abs(intercept1 - intercept2)
@@ -352,7 +354,7 @@ class CircleArea:
       
     
                 if (bottom_is_in): 
-                    self.find_point_horiz(circle_x, circle_y, circle_radius, box_top, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_horiz(circle_x, circle_y, circle_radius, box_top)
                     if (not(math.isnan(intercept1) or math.isnan(intercept2))): 
                         if (intercept1 >= box_left and intercept1 <= box_right and intercept2 >= box_left and intercept2 <= box_right): 
                             chord = abs(intercept1 - intercept2)
@@ -364,7 +366,7 @@ class CircleArea:
       
     
                 if (left_is_in): 
-                    self.find_point_vert(circle_x, circle_y, circle_radius, box_right, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_vert(circle_x, circle_y, circle_radius, box_right)
                     if (not(math.isnan(intercept1) or isnan(intercept2))): 
                         if (intercept1 >= box_bottom and intercept1 <= box_top and intercept2 >= box_bottom and intercept2 <= box_top): 
                             chord = abs(intercept1 - intercept2)
@@ -376,7 +378,7 @@ class CircleArea:
       
     
                 if (right_is_in): 
-                    self.find_point_vert(circle_x, circle_y, circle_radius, box_left, intercept1, intercept2)
+                    intercept1, intercept2 = self.find_point_vert(circle_x, circle_y, circle_radius, box_left)
                     if (not(math.isnan(intercept1) or math.isnan(intercept2))): 
                         if (intercept1 >= box_bottom and intercept1 <= box_top and intercept2 >= box_bottom and intercept2 <= box_top): 
                             chord = abs(intercept1 - intercept2)
@@ -396,6 +398,8 @@ class CircleArea:
         #fprintf(stderr, "three_part_model: impossible #6\n");
         #return 0
 
+        
+       
 
 
 
